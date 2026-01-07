@@ -139,11 +139,9 @@ The app will:
 
 **API Endpoints Used**:
 - `POST /api/generate-message` - Send messages
-- `GET /api/conversations` (TBD) - List conversations
-- `GET /api/conversation/:id` (TBD) - Get conversation details
-
-> [!NOTE]
-> The current API docs don't show conversation listing endpoints. We may need to investigate the server or add polling-based message retrieval.
+- `GET /api/db/conversations` - List all conversations
+- `GET /api/db/messages?conversationId=X` - Get messages for a conversation
+- `GET /api/db/user-models` - Get available models
 
 ---
 
@@ -268,9 +266,9 @@ sequenceDiagram
     App->>Server: POST /api/generate-message
     Server-->>App: { ok: true, conversation_id }
     
-    loop Poll for response (or SSE)
-        App->>Server: GET /api/conversation/:id
-        Server-->>App: Conversation with messages
+    loop Poll for response
+        App->>Server: GET /api/db/messages?conversationId=X
+        Server-->>App: Array of messages
     end
     
     App->>User: Display AI response
@@ -310,19 +308,16 @@ Since we're unsure if the server uses SSE or requires polling:
 
 ## Open Questions
 
-1. **Conversation retrieval**: The API docs don't show how to list/fetch existing conversations. Need to investigate server endpoints or add this functionality.
-
-2. **Real-time updates**: Need to test if `/api/generate-message` supports SSE or if we need to implement polling.
-
-3. **Model list**: How do we get available models? Need an endpoint like `GET /api/models`.
+1. **Real-time updates**: Need to test if `/api/generate-message` supports SSE or if we need to implement polling. The conversation has a `generating` flag we can poll to detect completion.
 
 ---
 
 ## Next Steps
 
 1. ✅ Review and approve this development plan
-2. Set up Tauri project structure
-3. Implement configuration system (Rust + UI)
-4. Build basic chat UI
-5. Integrate with `/api/generate-message`
-6. Add conversation history (pending API investigation)
+2. ✅ Confirm API endpoints for conversations/messages/models
+3. Set up Tauri project structure
+4. Implement configuration system (Rust + UI)
+5. Build basic chat UI
+6. Integrate with API endpoints
+7. Add conversation history and model selection
