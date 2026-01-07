@@ -11,7 +11,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            server_url: "https://nano.crocker-family.org".to_string(),
+            server_url: String::new(),
             api_key: String::new(),
         }
     }

@@ -34,7 +34,7 @@
       await saveConfig(config);
       testResult = { success: true, message: "Settings saved successfully!" };
       
-      if (onClose && !isFirstRun) {
+      if (onClose) {
         setTimeout(() => onClose?.(), 1000);
       }
     } catch (err) {
@@ -82,7 +82,7 @@
           id="server-url"
           type="url"
           bind:value={serverUrl}
-          placeholder="https://nano.crocker-family.org"
+          placeholder="https://api.example.com"
           required
         />
       </div>

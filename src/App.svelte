@@ -7,7 +7,7 @@
   let showSettings = false;
   let isFirstRun = false;
 
-  onMount(async () => {
+  async function loadAppConfig() {
     try {
       const config = await getConfig();
       
@@ -15,6 +15,8 @@
       if (!config.server_url || !config.api_key) {
         isFirstRun = true;
         showSettings = true;
+      } else {
+        isFirstRun = false;
       }
       
       configLoaded = true;
@@ -24,12 +26,16 @@
       showSettings = true;
       configLoaded = true;
     }
+  }
+
+  onMount(() => {
+    loadAppConfig();
   });
 
-  function handleSettingsClose() {
+  async function handleSettingsClose() {
     showSettings = false;
     // Reload config after settings are saved
-    location.reload();
+    await loadAppConfig();
   }
 
   function openSettings() {
@@ -43,7 +49,7 @@
   {:else if showSettings}
     <Settings 
       isFirstRun={isFirstRun}
-      onClose={isFirstRun ? null : handleSettingsClose}
+      onClose={handleSettingsClose}
     />
   {:else}
     <div class="app-content">
