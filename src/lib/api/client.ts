@@ -1,97 +1,58 @@
-// HTTP client for NanoChat API
-import { getConfig } from '../stores/config';
-import type { ApiError } from './types';
+import { getConfig } from "../stores/config";
+import type { ApiError } from "./types";
 
-/**
- * Make an authenticated API request
- * @param endpoint - API endpoint (e.g., '/api/db/conversations')
- * @param options - Standard fetch options
- * @returns Parsed JSON response
- * @throws ApiError on failure
- */
-export async function apiRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-): Promise<T> {
-    try {
-        // Get configuration
-        const config = await getConfig();
+interface RequestOptions extends RequestInit {
+    skipAuth?: boolean;
+}
 
-        if (!config.server_url || !config.api_key) {
-            throw {
-                message: 'API configuration not set. Please configure server URL and API key in settings.',
-                type: 'unknown',
-            } as ApiError;
-        }
+export async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    const config = await getConfig();
 
-        // Build full URL
-        const baseUrl = config.server_url.replace(/\/$/, ''); // Remove trailing slash
-        const url = `${baseUrl}${endpoint}`;
+    // Normalize server URL (remove trailing slash)
+    const baseUrl = config.server_url.replace(/\/$/, "");
+    const url = `${baseUrl}${endpoint}`;
 
-        // Prepare headers
-        const headers = new Headers(options.headers);
-        headers.set('Authorization', `Bearer ${config.api_key}`);
+    const headers = new Headers(options.headers);
 
-        // Set Content-Type to JSON if body is present and not already set
-        if (options.body && !headers.has('Content-Type')) {
-            headers.set('Content-Type', 'application/json');
-        }
-
-        // Make request
-        const response = await fetch(url, {
-            ...options,
-            headers,
-        });
-
-        // Handle HTTP errors
-        if (!response.ok) {
-            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-            // Try to get error details from response body
-            try {
-                const errorBody = await response.json();
-                if (errorBody.error || errorBody.message) {
-                    errorMessage = errorBody.error || errorBody.message;
-                }
-            } catch {
-                // If response body is not JSON, use status text
-            }
-
-            throw {
-                message: errorMessage,
-                status: response.status,
-                type: 'http',
-            } as ApiError;
-        }
-
-        // Parse response
-        try {
-            const data = await response.json();
-            return data as T;
-        } catch (err) {
-            throw {
-                message: 'Failed to parse response as JSON',
-                type: 'parse',
-            } as ApiError;
-        }
-    } catch (err) {
-        // Re-throw ApiError as-is
-        if ((err as ApiError).type) {
-            throw err;
-        }
-
-        // Handle network errors
-        if (err instanceof TypeError) {
-            throw {
-                message: 'Network error. Please check your connection and server URL.',
-                type: 'network',
-            } as ApiError;
-        }
-
-        // Unknown error
-        throw {
-            message: err instanceof Error ? err.message : 'An unknown error occurred',
-            type: 'unknown',
-        } as ApiError;
+    // Add Content-Type if body is present and not FormData
+    if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
     }
+
+    // Add Authorization header
+    if (!options.skipAuth && config.api_key) {
+        headers.set("Authorization", `Bearer ${config.api_key}`);
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
+
+    if (!response.ok) {
+        let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+        try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+                errorMessage = errorData.error;
+            } else if (errorData && errorData.message) {
+                errorMessage = errorData.message;
+            }
+        } catch (e) {
+            // Ignore non-JSON error bodies
+        }
+
+        const error: ApiError = {
+            message: errorMessage,
+            status: response.status,
+        };
+        throw error;
+    }
+
+    // Handle 204 No Content
+    if (response.status === 204) {
+        return {} as T;
+    }
+
+    return response.json();
 }

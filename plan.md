@@ -84,8 +84,8 @@ npm install
 ```bash
 npm run tauri dev
 ```
-- [ ] Window opens with default Tauri welcome page
-- [ ] No build errors in terminal
+- [x] Window opens with default Tauri welcome page
+- [x] No build errors in terminal
 
 ### 1.4 Configure Tauri
 Update `src-tauri/tauri.conf.json`:
@@ -126,9 +126,9 @@ Modify `src/App.svelte`:
 - Block app usage until valid config is saved
 
 **Verification:**
-- [ ] Config file created at `~/.config/nanochat-desktop/config.toml`
-- [ ] Settings saved persist across app restart
-- [ ] Connection test works with valid API key
+- [x] Config file created at `~/.config/nanochat-desktop/config.toml`
+- [x] Settings saved persist across app restart
+- [x] Connection test works with valid API key
 
 ---
 
@@ -156,8 +156,8 @@ Create `src/lib/api/`:
 - `models.ts` - get available models
 
 **Verification:**
-- [ ] Console log successful API responses
-- [ ] Error handling shows user-friendly messages
+- [x] Console log successful API responses
+- [x] Error handling shows user-friendly messages
 
 ---
 

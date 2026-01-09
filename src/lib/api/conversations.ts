@@ -1,123 +1,71 @@
-// Conversation API functions
-import { apiRequest } from './client';
-import type { Conversation } from './types';
+import { apiRequest } from "./client";
+import type { Conversation } from "./types";
 
-/**
- * List all conversations for the user
- * @param projectId - Optional project ID to filter by (use 'null' string for non-project conversations)
- */
-export async function listConversations(projectId?: string): Promise<Conversation[]> {
+export async function getConversations(
+    projectId: string | null = null,
+    search?: string,
+    mode: "exact" | "words" | "fuzzy" = "fuzzy"
+): Promise<Conversation[]> {
     const params = new URLSearchParams();
-    if (projectId !== undefined) {
-        params.set('projectId', projectId);
+    if (projectId) params.append("projectId", projectId);
+    else params.append("projectId", "null"); // Explicitly fetch non-project conversations if null
+
+    if (search) {
+        params.append("search", search);
+        params.append("mode", mode);
     }
 
-    const query = params.toString();
-    const endpoint = `/api/db/conversations${query ? `?${query}` : ''}`;
-
-    return apiRequest<Conversation[]>(endpoint, {
-        method: 'GET',
-    });
+    return apiRequest<Conversation[]>(`/api/db/conversations?${params.toString()}`);
 }
 
-/**
- * Get a specific conversation by ID
- * @param id - Conversation ID
- */
 export async function getConversation(id: string): Promise<Conversation> {
-    return apiRequest<Conversation>(`/api/db/conversations?id=${id}`, {
-        method: 'GET',
-    });
+    const list = await apiRequest<Conversation[]>(`/api/db/conversations?id=${id}`);
+    if (list.length === 0) {
+        throw { message: "Conversation not found", status: 404 };
+    }
+    return list[0];
 }
 
-/**
- * Create a new empty conversation
- * @param title - Conversation title
- * @param projectId - Optional project ID
- */
-export async function createConversation(
-    title: string,
-    projectId?: string
-): Promise<Conversation> {
-    return apiRequest<Conversation>('/api/db/conversations', {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'create',
-            title,
-            projectId,
-        }),
-    });
-}
-
-/**
- * Create a conversation with an initial message
- * @param content - Message content
- * @param projectId - Optional project ID
- */
-export async function createConversationWithMessage(
-    content: string,
-    projectId?: string
-): Promise<Conversation> {
-    return apiRequest<Conversation>('/api/db/conversations', {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'createWithMessage',
-            content,
-            contentHtml: content, // Simple text for now
-            role: 'user',
-            projectId,
-        }),
-    });
-}
-
-/**
- * Update conversation title
- * @param conversationId - Conversation ID
- * @param title - New title
- */
-export async function updateTitle(
-    conversationId: string,
-    title: string
-): Promise<void> {
-    await apiRequest<void>('/api/db/conversations', {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'updateTitle',
-            conversationId,
-            title,
-        }),
-    });
-}
-
-/**
- * Toggle conversation pin status
- * @param conversationId - Conversation ID
- */
-export async function togglePin(conversationId: string): Promise<void> {
-    await apiRequest<void>('/api/db/conversations', {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'togglePin',
-            conversationId,
-        }),
-    });
-}
-
-/**
- * Delete a conversation
- * @param id - Conversation ID
- */
 export async function deleteConversation(id: string): Promise<void> {
-    await apiRequest<void>(`/api/db/conversations?id=${id}`, {
-        method: 'DELETE',
+    return apiRequest<void>(`/api/db/conversations?id=${id}`, {
+        method: "DELETE",
     });
 }
 
-/**
- * Delete all conversations for the user
- */
 export async function deleteAllConversations(): Promise<void> {
-    await apiRequest<void>('/api/db/conversations?all=true', {
-        method: 'DELETE',
+    return apiRequest<void>(`/api/db/conversations?all=true`, {
+        method: "DELETE",
+    });
+}
+
+export async function createConversation(title: string, projectId?: string): Promise<Conversation> {
+    return apiRequest<Conversation>("/api/db/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "create",
+            title,
+            projectId,
+        }),
+    });
+}
+
+export async function updateConversationTitle(id: string, title: string): Promise<Conversation> {
+    return apiRequest<Conversation>("/api/db/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "updateTitle",
+            conversationId: id,
+            title,
+        }),
+    });
+}
+
+export async function toggleConversationPin(id: string): Promise<Conversation> {
+    return apiRequest<Conversation>("/api/db/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "togglePin",
+            conversationId: id,
+        }),
     });
 }

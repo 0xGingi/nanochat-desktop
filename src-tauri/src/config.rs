@@ -20,7 +20,7 @@ impl Default for Config {
 impl Config {
     /// Get the path to the config file
     pub fn config_path() -> Result<PathBuf, String> {
-        let config_dir = directories::ProjectDirs::from("org", "nanochat", "nanochat-desktop")
+        let config_dir = directories::ProjectDirs::from("", "", "nanochat-desktop")
             .ok_or("Failed to determine config directory")?
             .config_dir()
             .to_path_buf();
