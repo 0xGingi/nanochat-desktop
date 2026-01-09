@@ -94,28 +94,14 @@ function createChatStore() {
             }));
 
             try {
-                // Create the user message first
-                const userMessage = await messagesApi.createMessage(
-                    conversationId,
-                    'user',
-                    content,
-                    `<p>${content}</p>`
-                );
-
-                // Add user message to store immediately
-                update(state => ({
-                    ...state,
-                    messages: [...state.messages, userMessage],
-                }));
-
-                // Generate AI response
+                // Generate AI response (this creates the user message on the server)
                 await messagesApi.generateMessage({
                     message: content,
                     model_id: modelId,
                     conversation_id: conversationId,
                 });
 
-                // Start polling for the assistant's response
+                // Start polling immediately - both user and assistant messages will appear
                 this.startPolling(conversationId);
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
