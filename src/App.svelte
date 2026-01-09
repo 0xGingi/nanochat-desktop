@@ -11,19 +11,23 @@
 
   async function loadAppConfig() {
     try {
+      console.log('[App] Loading config...');
       const config = await getConfig();
+      console.log('[App] Config loaded:', config);
       
       // Check if config is valid (has both server_url and api_key)
       if (!config.server_url || !config.api_key) {
+        console.log('[App] Config invalid or first run');
         isFirstRun = true;
         showSettings = true;
       } else {
+        console.log('[App] Config valid, showing main app');
         isFirstRun = false;
       }
       
       configLoaded = true;
     } catch (err) {
-      console.error("Failed to load config:", err);
+      console.error("[App] Failed to load config:", err);
       isFirstRun = true;
       showSettings = true;
       configLoaded = true;
@@ -31,6 +35,7 @@
   }
 
   onMount(() => {
+    console.log('[App] Component mounted');
     loadAppConfig();
   });
 
