@@ -125,10 +125,16 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="delete-dialog-title"
+    tabindex="-1"
     on:click={cancelDelete}
     on:keydown={(e) => e.key === 'Escape' && cancelDelete()}
   >
-    <div class="modal-content" on:click|stopPropagation role="document">
+    <div
+      class="modal-content"
+      on:click|stopPropagation
+      on:keydown={(e) => e.key === 'Escape' && cancelDelete()}
+      role="document"
+    >
       <h3 id="delete-dialog-title">Delete Conversation</h3>
       <p>Are you sure you want to delete this conversation? This action cannot be undone.</p>
       <div class="modal-actions">

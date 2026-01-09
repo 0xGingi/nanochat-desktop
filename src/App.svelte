@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Settings from "./lib/components/Settings.svelte";
   import ConversationList from "./lib/components/ConversationList.svelte";
+  import ChatView from "./lib/components/ChatView.svelte";
   import { getConfig } from "./lib/stores/config";
   import { selectedConversation } from "./lib/stores/conversations";
 
@@ -68,11 +69,7 @@
     
     <main class="main-content">
       {#if $selectedConversation}
-        <div class="chat-placeholder">
-          <h2>{$selectedConversation.title || 'Untitled Conversation'}</h2>
-          <p>Chat view will appear here (Phase 5)</p>
-          <p class="conversation-id">ID: {$selectedConversation.id}</p>
-        </div>
+        <ChatView />
       {:else}
         <div class="empty-placeholder">
           <div class="empty-content">
@@ -143,31 +140,7 @@
     flex: 1;
     height: 100%;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background: var(--color-bg);
-  }
-
-  .chat-placeholder {
-    text-align: center;
-    padding: 2rem;
-    color: var(--color-text-secondary);
-  }
-
-  .chat-placeholder h2 {
-    color: var(--color-text);
-    margin-bottom: 0.5rem;
-  }
-
-  .chat-placeholder p {
-    margin: 0.25rem 0;
-  }
-
-  .conversation-id {
-    font-size: 0.75rem;
-    color: var(--color-text-tertiary);
-    font-family: 'Courier New', monospace;
   }
 
   .empty-placeholder {
