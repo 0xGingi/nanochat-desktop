@@ -14,29 +14,22 @@ fn save_config(config: Config) -> Result<(), String> {
 
 #[tauri::command]
 async fn validate_connection(server_url: String, api_key: String) -> Result<bool, String> {
-    // Test connection by making a minimal request to generate-message endpoint
-    // We send an incomplete request that will fail validation server-side,
-    // but will confirm the API key is valid (401 vs 400)
+    // Test connection by fetching user settings
+    // This is a lightweight authenticated endpoint
     let client = reqwest::Client::new();
-    let url = format!("{}/api/generate-message", server_url.trim_end_matches('/'));
+    let url = format!("{}/api/db/user-settings", server_url.trim_end_matches('/'));
     
     let response = client
-        .post(&url)
+        .get(&url)
         .header("Authorization", format!("Bearer {}", api_key))
         .header("Content-Type", "application/json")
-        .body("{}")  // Empty body - will fail validation but tests auth
         .send()
         .await
         .map_err(|e| format!("Connection failed: {}", e))?;
 
     let status = response.status();
     
-    // 400 = Bad Request (auth worked, but missing required fields) = SUCCESS for our test
-    // 200 = OK (shouldn't happen with empty body, but would mean success)
-    // 401 = Unauthorized (invalid API key)
-    // 404 = Not Found (wrong URL)
-    
-    if status.is_success() || status == 400 {
+    if status.is_success() {
         Ok(true)
     } else if status == 401 {
         Err("Invalid API key or unauthorized".to_string())

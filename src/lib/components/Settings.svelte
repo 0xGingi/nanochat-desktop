@@ -161,7 +161,7 @@
   }
 
   .settings-modal {
-    background: #1e1e1e;
+    background: var(--color-bg-secondary);
     border-radius: 12px;
     padding: 2rem;
     width: 90%;
@@ -172,12 +172,12 @@
 
   h2 {
     margin: 0 0 1.5rem 0;
-    color: #fff;
+    color: var(--color-text);
     font-size: 1.5rem;
   }
 
   .first-run-message {
-    background: #2a4d6e;
+    background: var(--color-accent);
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
@@ -187,7 +187,7 @@
   .first-run-note {
     margin-top: 1rem;
     font-size: 0.9rem;
-    color: #888;
+    color: var(--color-text-secondary);
     text-align: center;
   }
 
@@ -198,24 +198,24 @@
   label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #ccc;
+    color: var(--color-text-secondary);
     font-weight: 500;
   }
 
   input {
     width: 100%;
     padding: 0.75rem;
-    background: #2a2a2a;
-    border: 1px solid #444;
+    background: var(--color-bg-hover);
+    border: 1px solid var(--color-border);
     border-radius: 6px;
-    color: #fff;
+    color: var(--color-text);
     font-size: 1rem;
     box-sizing: border-box;
   }
 
   input:focus {
     outline: none;
-    border-color: #4a9eff;
+    border-color: var(--color-accent);
   }
 
   .api-key-input {
@@ -230,16 +230,17 @@
 
   .toggle-visibility {
     padding: 0.75rem 1rem;
-    background: #2a2a2a;
-    border: 1px solid #444;
+    background: var(--color-bg-hover);
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     cursor: pointer;
     font-size: 1.2rem;
-    transition: background 0.2s;
+    transition: background var(--transition-fast);
+    color: var(--color-text);
   }
 
   .toggle-visibility:hover {
-    background: #333;
+    background: var(--color-bg-selected);
   }
 
   .test-result {
@@ -250,13 +251,13 @@
   }
 
   .test-result.success {
-    background: #1a4d2e;
-    color: #7cf0a0;
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--color-success);
   }
 
   .test-result.error {
-    background: #4d1a1a;
-    color: #f07c7c;
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
   }
 
   .button-group {
@@ -273,26 +274,26 @@
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
   }
 
   .btn-primary {
-    background: #4a9eff;
+    background: var(--color-accent);
     color: white;
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: #3a8eef;
+    background: var(--color-accent-hover);
   }
 
   .btn-secondary {
-    background: #2a2a2a;
-    color: #fff;
-    border: 1px solid #444;
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background: #333;
+    background: var(--color-bg-selected);
   }
 
   button:disabled {
@@ -307,7 +308,7 @@
     background: transparent;
     border: none;
     font-size: 2rem;
-    color: #888;
+    color: var(--color-text-secondary);
     cursor: pointer;
     padding: 0;
     width: 2rem;
@@ -316,6 +317,6 @@
   }
 
   .close-button:hover {
-    color: #fff;
+    color: var(--color-text);
   }
 </style>
