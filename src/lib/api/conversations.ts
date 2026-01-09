@@ -1,5 +1,5 @@
 import { apiRequest } from "./client";
-import type { Conversation } from "./types";
+import type { Conversation, Role, ImageAttachment } from "./types";
 
 export async function getConversations(
     projectId: string | null = null,
@@ -49,6 +49,28 @@ export async function createConversation(title: string, projectId?: string): Pro
     });
 }
 
+export async function createWithMessage(
+    content: string,
+    contentHtml: string,
+    role: Role = "user",
+    options?: {
+        images?: ImageAttachment[];
+        webSearchEnabled?: boolean;
+        projectId?: string;
+    }
+): Promise<Conversation> {
+    return apiRequest<Conversation>("/api/db/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "createWithMessage",
+            content,
+            contentHtml,
+            role,
+            ...options,
+        }),
+    });
+}
+
 export async function updateConversationTitle(id: string, title: string): Promise<Conversation> {
     return apiRequest<Conversation>("/api/db/conversations", {
         method: "POST",
@@ -69,3 +91,26 @@ export async function toggleConversationPin(id: string): Promise<Conversation> {
         }),
     });
 }
+
+export async function setConversationPublic(id: string, isPublic: boolean): Promise<Conversation> {
+    return apiRequest<Conversation>("/api/db/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "setPublic",
+            conversationId: id,
+            public: isPublic,
+        }),
+    });
+}
+
+export async function branchConversation(conversationId: string, fromMessageId: string): Promise<Conversation> {
+    return apiRequest<Conversation>("/api/db/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "branch",
+            conversationId,
+            fromMessageId,
+        }),
+    });
+}
+

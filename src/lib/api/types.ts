@@ -3,6 +3,9 @@ export type WebSearchMode = "off" | "standard" | "deep";
 export type WebSearchProvider = "linkup" | "tavily" | "exa" | "kagi";
 export type ReasoningEffort = "low" | "medium" | "high";
 export type FileType = "pdf" | "markdown" | "text" | "epub";
+export type ProjectRole = "owner" | "editor" | "viewer";
+export type MessageAction = "regenerate" | "edit" | "copy" | "share";
+export type ThumbsRating = "up" | "down";
 
 export interface ImageAttachment {
     url: string;
@@ -71,7 +74,140 @@ export interface UserModel {
     pinned: boolean;
 }
 
+export interface ModelProvider {
+    canonicalId: string;
+    displayName: string;
+    supportsProviderSelection: boolean;
+    providers: string[];
+}
+
+export interface Assistant {
+    id: string;
+    name: string;
+    description: string | null;
+    systemPrompt: string;
+    isDefault: boolean;
+    defaultModelId: string | null;
+    defaultWebSearchMode: WebSearchMode | null;
+    defaultWebSearchProvider: WebSearchProvider | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Project {
+    id: string;
+    name: string;
+    description: string | null;
+    systemPrompt: string | null;
+    color: string | null;
+    role: ProjectRole;
+    isShared: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProjectFile {
+    id: string;
+    projectId: string;
+    storageId: string;
+    fileName: string;
+    fileType: FileType;
+    extractedContent: string | null;
+    createdAt: string;
+    storage?: StorageItem;
+}
+
+export interface ProjectMember {
+    id: string;
+    projectId: string;
+    userId: string;
+    role: ProjectRole;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        image: string | null;
+    };
+}
+
+export interface StorageItem {
+    id: string;
+    url: string;
+}
+
+export interface StorageUploadResponse {
+    storageId: string;
+    url: string;
+}
+
+export interface UserSettings {
+    userId: string;
+    privacyMode: boolean;
+    contextMemoryEnabled: boolean;
+    persistentMemoryEnabled: boolean;
+    theme: string | null;
+}
+
+export interface UserRule {
+    id: string;
+    name: string;
+    attach: boolean;
+    rule: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ApiKey {
+    id: string;
+    name: string;
+    lastUsedAt: string | null;
+    createdAt: string;
+}
+
+export interface ApiKeyCreateResponse {
+    id: string;
+    key: string;
+    name: string;
+    createdAt: string;
+}
+
+export interface MessageInteraction {
+    id: string;
+    messageId: string;
+    userId: string;
+    action: MessageAction;
+    metadata: Record<string, unknown> | null;
+    createdAt: string;
+}
+
+export interface MessageRating {
+    id: string;
+    messageId: string;
+    userId: string;
+    thumbs: ThumbsRating | null;
+    rating: number | null;
+    categories: string[] | null;
+    feedback: string | null;
+    createdAt: string;
+}
+
+export interface NanoGptBalance {
+    balance: number;
+    currency: string;
+}
+
+export interface FollowUpQuestionsResponse {
+    ok: boolean;
+    suggestions: string[];
+}
+
+export interface EnhancePromptResponse {
+    ok: boolean;
+    enhanced_prompt: string;
+}
+
 export interface ApiError {
     message: string;
     status: number;
 }
+

@@ -136,24 +136,97 @@ Modify `src/App.svelte`:
 
 **Goal:** TypeScript API client for all server endpoints
 
+> [!NOTE]
+> Refer to `api-docs.md` for complete endpoint details, request/response schemas, and CURL examples.
+
 ### 3.1 Type Definitions
 Create `src/lib/api/types.ts`:
-- `Conversation` interface
-- `Message` interface
-- `UserModel` interface
-- `GenerateMessageRequest/Response` interfaces
+- `Conversation` interface (id, title, projectId, pinned, generating, costUsd, createdAt, updatedAt)
+- `Message` interface (id, conversationId, role, content, contentHtml, modelId, reasoning, images, documents, createdAt)
+- `Assistant` interface (id, name, description, systemPrompt, isDefault, defaultModelId, defaultWebSearchMode)
+- `Project` interface (id, name, description, role, isShared, files, members)
+- `ProjectFile` interface (id, projectId, storageId, fileName, fileType)
+- `UserModel` interface (modelId, provider, enabled, pinned)
+- `UserSettings` interface (privacyMode, contextMemoryEnabled, persistentMemoryEnabled, theme)
+- `ApiKey` interface (id, name, lastUsedAt, createdAt)
+- `GenerateMessageRequest` interface (with all options: message, model_id, assistant_id, project_id, conversation_id, web_search_enabled, web_search_mode, images, documents, reasoning_effort, temporary)
+- `GenerateMessageResponse` interface (ok, conversation_id)
+- `StorageItem` interface (storageId, url)
 
 ### 3.2 HTTP Client
 Create `src/lib/api/client.ts`:
-- `apiRequest()` helper with auth header injection
-- Error handling wrapper
+- `apiRequest()` helper with `Authorization: Bearer <api_key>` header injection
+- Error handling wrapper with user-friendly messages
 - Base URL from config
+- Support for JSON, FormData, and binary request/response types
 
 ### 3.3 API Functions
-Create `src/lib/api/`:
-- `conversations.ts` - list, get, create, delete conversations
-- `messages.ts` - get messages, generate message
-- `models.ts` - get available models
+Create the following modules in `src/lib/api/`:
+
+**conversations.ts** - `/api/db/conversations`
+- `listConversations(projectId?, search?, mode?)` - GET with optional filters
+- `getConversation(id)` - GET with id parameter
+- `createConversation(title, projectId?)` - POST with action: create
+- `createWithMessage(content, role, images?, projectId?)` - POST with action: createWithMessage
+- `updateTitle(conversationId, title)` - POST with action: updateTitle
+- `togglePin(conversationId)` - POST with action: togglePin
+- `setPublic(conversationId, public)` - POST with action: setPublic
+- `deleteConversation(id)` - DELETE
+- `deleteAllConversations()` - DELETE with all=true
+
+**messages.ts** - `/api/db/messages` & `/api/generate-message`
+- `getMessages(conversationId)` - GET messages for conversation
+- `createMessage(conversationId, role, content)` - POST with action: create
+- `updateMessageContent(messageId, content)` - POST with action: updateContent
+- `deleteMessage(messageId)` - POST with action: delete
+- `generateMessage(request: GenerateMessageRequest)` - POST to /api/generate-message
+- `cancelGeneration(conversationId, sessionToken)` - POST to /api/cancel-generation
+
+**models.ts** - `/api/db/user-models` & `/api/model-providers`
+- `getUserModels(provider?)` - GET enabled models
+- `setModelEnabled(provider, modelId, enabled)` - POST with action: set
+- `toggleModelPinned(provider, modelId)` - POST with action: togglePinned
+- `getModelProviders(modelId)` - GET available providers for a model
+
+**assistants.ts** - `/api/assistants`
+- `listAssistants()` - GET
+- `createAssistant(name, systemPrompt, options?)` - POST
+- `updateAssistant(id, updates)` - PATCH
+- `deleteAssistant(id)` - DELETE
+- `setDefaultAssistant(id)` - POST with action: setDefault
+
+**projects.ts** - `/api/projects`
+- `listProjects()` - GET
+- `getProject(id)` - GET
+- `createProject(name, description?, systemPrompt?, color?)` - POST
+- `updateProject(id, updates)` - PATCH
+- `deleteProject(id)` - DELETE
+
+**project-files.ts** - `/api/projects/[id]/files`
+- `listProjectFiles(projectId)` - GET
+- `uploadProjectFile(projectId, file: File)` - POST (FormData)
+- `deleteProjectFile(projectId, fileId)` - DELETE
+
+**storage.ts** - `/api/storage`
+- `uploadFile(file: File, contentType: string, filename?: string)` - POST
+- `getFileUrl(storageId)` - GET
+- `downloadFile(storageId)` - GET raw content
+- `deleteFile(storageId)` - DELETE
+
+**settings.ts** - `/api/db/user-settings`
+- `getUserSettings()` - GET
+- `updateUserSettings(updates)` - POST with action: update
+
+**api-keys.ts** - `/api/api-keys`
+- `listApiKeys()` - GET
+- `createApiKey(name)` - POST
+- `deleteApiKey(id)` - DELETE
+
+**utilities.ts** - Utility endpoints
+- `enhancePrompt(prompt)` - POST `/api/enhance-prompt`
+- `generateFollowUpQuestions(conversationId, messageId)` - POST `/api/generate-follow-up-questions`
+- `cleanupTempConversations()` - POST `/api/cleanup-temp-conversations`
+- `getNanoGptBalance()` - POST `/api/nano-gpt/balance`
 
 **Verification:**
 - [x] Console log successful API responses
@@ -343,20 +416,64 @@ npm run tauri build
 
 ## Future Phases (V2+)
 
+> [!NOTE]
+> These features leverage the comprehensive API endpoints documented in `api-docs.md`.
+
 ### V2 - File Attachments
 - Add file picker to ChatInput
-- Upload via `/api/storage`
-- Display images/documents in messages
+- Upload images via `/api/storage` (POST with binary content)
+- Upload documents (PDF, Markdown, Text, EPUB) via storage
+- Display attached images inline in messages
+- Display document links/previews in messages
+- Pass `images` and `documents` arrays to generate-message
 
 ### V2 - Assistants
-- Load assistants from API
-- Assistant selector in UI
-- Pass assistant_id to generate-message
+- Load assistants from `/api/assistants` on app init
+- Assistant selector dropdown in ChatInput or header
+- Create/Edit/Delete assistants via Settings UI
+- Pass `assistant_id` to generate-message
+- Show assistant name/icon in chat header
+- Set default assistant per user
+
+### V2 - Web Search Integration
+- Toggle web search in ChatInput
+- Web search mode selector (off/standard/deep)
+- Provider selector (linkup/tavily/exa/kagi)
+- Pass `web_search_enabled`, `web_search_mode`, `web_search_provider` to generate-message
+- Display search citations in assistant responses
 
 ### V3 - Projects
-- Project list/selector
-- Filter conversations by project
-- Create conversations in projects
+- Project list sidebar or dropdown
+- Create/Edit/Delete projects via `/api/projects`
+- Filter conversations by `projectId`
+- Create conversations within projects
+- Project file management (upload/download/delete via `/api/projects/[id]/files`)
+- Project member management (add/remove via `/api/projects/[id]/members`)
+- Project-specific system prompts
+
+### V3 - User Settings Sync
+- Fetch user settings from `/api/db/user-settings`
+- Sync privacy mode, memory settings, theme preferences
+- User rules management via `/api/db/user-rules`
+- Custom system prompt rules
+
+### V3 - Message Feedback
+- Thumbs up/down ratings via `/api/db/message-ratings`
+- Message interaction tracking (copy, share) via `/api/db/message-interactions`
+- Follow-up question suggestions via `/api/generate-follow-up-questions`
+
+### V4 - Advanced Features
+- Text-to-Speech via `/api/tts` (audio playback of responses)
+- Speech-to-Text via `/api/stt` (voice input)
+- Video generation via `/api/video/generate` and status polling
+- NanoGPT balance display via `/api/nano-gpt/balance`
+- Model performance stats via `/api/db/model-performance`
+- Provider preferences via `/api/provider-preferences`
+- Prompt enhancement via `/api/enhance-prompt`
+- Cancel generation via `/api/cancel-generation`
+- Conversation branching via branch action
+- Conversation sharing (public toggle)
+- Conversation pinning
 
 ---
 
@@ -367,23 +484,36 @@ nanochat-desktop/
 ├── src/
 │   ├── lib/
 │   │   ├── api/
-│   │   │   ├── client.ts
-│   │   │   ├── conversations.ts
-│   │   │   ├── messages.ts
-│   │   │   ├── models.ts
-│   │   │   └── types.ts
+│   │   │   ├── client.ts         # HTTP client with auth
+│   │   │   ├── types.ts          # All TypeScript interfaces
+│   │   │   ├── conversations.ts  # Conversation CRUD
+│   │   │   ├── messages.ts       # Message CRUD + generate
+│   │   │   ├── models.ts         # User models & providers
+│   │   │   ├── assistants.ts     # Assistant CRUD
+│   │   │   ├── projects.ts       # Project CRUD
+│   │   │   ├── project-files.ts  # Project file management
+│   │   │   ├── storage.ts        # File upload/download
+│   │   │   ├── settings.ts       # User settings
+│   │   │   ├── api-keys.ts       # API key management
+│   │   │   └── utilities.ts      # Misc utility endpoints
 │   │   ├── components/
 │   │   │   ├── ChatInput.svelte
 │   │   │   ├── ChatMessage.svelte
 │   │   │   ├── ChatView.svelte
 │   │   │   ├── ConversationList.svelte
 │   │   │   ├── ModelSelector.svelte
+│   │   │   ├── AssistantSelector.svelte  # V2
+│   │   │   ├── WebSearchToggle.svelte    # V2
+│   │   │   ├── FileAttachment.svelte     # V2
+│   │   │   ├── ProjectSelector.svelte    # V3
 │   │   │   └── Settings.svelte
 │   │   └── stores/
 │   │       ├── chat.ts
 │   │       ├── config.ts
 │   │       ├── conversations.ts
-│   │       └── models.ts
+│   │       ├── models.ts
+│   │       ├── assistants.ts     # V2
+│   │       └── projects.ts       # V3
 │   ├── App.svelte
 │   ├── app.css
 │   ├── main.ts
@@ -396,8 +526,11 @@ nanochat-desktop/
 │   ├── Cargo.toml
 │   ├── tauri.conf.json
 │   └── icons/
+├── api-docs.md                   # API reference documentation
+├── plan.md                       # This implementation plan
 ├── package.json
 ├── svelte.config.js
 ├── tsconfig.json
 └── vite.config.ts
 ```
+
