@@ -165,12 +165,8 @@ function createChatStore() {
                     // Update message count for next poll
                     previousMessageCount = messages.length;
 
-                    // Get conversation to check generating status
-                    const conversation = await conversationsApi.getConversation(conversationId);
-                    console.log(`[Chat] Conversation generating flag: ${conversation.generating}`);
-
-                    // Stop polling if we have an assistant response or generation is complete
-                    const generationComplete = !conversation.generating || assistantMessages.length > 0;
+                    // Stop polling if we have assistant messages
+                    const generationComplete = assistantMessages.length > 0;
 
                     update(state => ({
                         ...state,
