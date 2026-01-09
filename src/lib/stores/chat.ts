@@ -81,6 +81,13 @@ function createChatStore() {
                 throw new Error('No active conversation');
             }
 
+            // Get current message counts before sending
+            const currentMessages = state.messages;
+            const initialMessageCount = currentMessages.length;
+            const initialAssistantCount = currentMessages.filter(m => m.role === 'assistant').length;
+
+            console.log('[Chat] Before send - Total messages:', initialMessageCount, 'Assistant:', initialAssistantCount);
+
             // Clear any existing polling
             if (pollInterval) {
                 clearInterval(pollInterval);
@@ -101,8 +108,8 @@ function createChatStore() {
                     conversation_id: conversationId,
                 });
 
-                // Start polling immediately - both user and assistant messages will appear
-                this.startPolling(conversationId);
+                // Start polling with initial counts
+                this.startPolling(conversationId, initialMessageCount, initialAssistantCount);
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
                 update(state => ({
@@ -114,16 +121,14 @@ function createChatStore() {
             }
         },
 
-        startPolling(conversationId: string) {
+        startPolling(conversationId: string, initialMessageCount: number, initialAssistantCount: number) {
             // Clear any existing interval
             if (pollInterval) {
                 clearInterval(pollInterval);
             }
 
-            console.log('[Chat] Starting polling for conversation:', conversationId);
+            console.log('[Chat] Starting polling for conversation:', conversationId, 'Initial counts:', { total: initialMessageCount, assistant: initialAssistantCount });
 
-            // Track message count to detect new messages
-            let previousMessageCount = 0;
             let pollCount = 0;
             const maxPolls = 120; // Maximum 60 seconds of polling (120 * 500ms)
 
@@ -135,40 +140,28 @@ function createChatStore() {
                     // Reload messages to get the latest
                     const messages = await messagesApi.getMessages(conversationId);
 
-                    console.log(`[Chat] Poll #${pollCount}: Fetched ${messages.length} messages (previous: ${previousMessageCount})`);
-
-                    // Check if new messages have arrived
-                    const hasNewMessages = messages.length > previousMessageCount;
-
-                    if (hasNewMessages) {
-                        console.log('[Chat] New messages detected!');
-                    }
-
-                    // Check for assistant messages
                     const assistantMessages = messages.filter(m => m.role === 'assistant');
-                    console.log(`[Chat] Assistant messages: ${assistantMessages.length}`);
+                    const currentAssistantCount = assistantMessages.length;
 
-                    // Update message count for next poll
-                    previousMessageCount = messages.length;
+                    console.log(`[Chat] Poll #${pollCount}: Total ${messages.length}, Assistant ${currentAssistantCount} (initial: ${initialAssistantCount})`);
 
-                    // Stop polling if we have assistant messages
-                    const generationComplete = assistantMessages.length > 0;
-
+                    // Update state with latest messages
                     update(state => ({
                         ...state,
                         messages,
-                        generating: !generationComplete,
                     }));
 
-                    console.log(`[Chat] Generation complete: ${generationComplete}`);
+                    // Stop polling if we have NEW assistant messages (count increased)
+                    const hasNewAssistantMessages = currentAssistantCount > initialAssistantCount;
 
-                    // Stop polling when generation is complete
-                    if (generationComplete) {
-                        console.log('[Chat] Stopping polling - generation complete');
+                    if (hasNewAssistantMessages) {
+                        console.log('[Chat] New assistant message detected! Stopping polling.');
+                        update(state => ({ ...state, generating: false }));
                         if (pollInterval) {
                             clearInterval(pollInterval);
                             pollInterval = null;
                         }
+                        return;
                     }
 
                     // Safety: stop polling after max attempts
