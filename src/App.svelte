@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Settings from "./lib/components/Settings.svelte";
+  import ConversationList from "./lib/components/ConversationList.svelte";
   import { getConfig } from "./lib/stores/config";
+  import { selectedConversation } from "./lib/stores/conversations";
 
   let configLoaded = false;
   let showSettings = false;
@@ -43,64 +45,181 @@
   }
 </script>
 
-<main>
-  {#if !configLoaded}
-    <div class="loading">Loading...</div>
-  {:else if showSettings}
-    <Settings 
-      isFirstRun={isFirstRun}
-      onClose={handleSettingsClose}
-    />
-  {:else}
-    <div class="app-content">
-      <h1>NanoChat Desktop</h1>
-      <p>Welcome to NanoChat Desktop!</p>
-      <button on:click={openSettings}>Open Settings</button>
-    </div>
-  {/if}
-</main>
+{#if !configLoaded}
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+{:else if showSettings}
+  <Settings 
+    isFirstRun={isFirstRun}
+    onClose={handleSettingsClose}
+  />
+{:else}
+  <div class="app-container">
+    <aside class="sidebar">
+      <ConversationList />
+    </aside>
+    
+    <main class="main-content">
+      {#if $selectedConversation}
+        <div class="chat-placeholder">
+          <h2>{$selectedConversation.title || 'Untitled Conversation'}</h2>
+          <p>Chat view will appear here (Phase 5)</p>
+          <p class="conversation-id">ID: {$selectedConversation.id}</p>
+        </div>
+      {:else}
+        <div class="empty-placeholder">
+          <div class="empty-content">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <h2>Welcome to NanoChat Desktop</h2>
+            <p>Select a conversation from the sidebar to get started</p>
+            <button class="settings-btn" on:click={openSettings}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/>
+              </svg>
+              Settings
+            </button>
+          </div>
+        </div>
+      {/if}
+    </main>
+  </div>
+{/if}
 
 <style>
-  main {
-    width: 100%;
+  .loading-screen {
+    width: 100vw;
     height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
   }
 
-  .loading {
-    color: #888;
-    font-size: 1.2rem;
-  }
-
-  .app-content {
-    text-align: center;
-    padding: 2rem;
-  }
-
-  h1 {
-    color: #fff;
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
     margin-bottom: 1rem;
   }
 
-  p {
-    color: #ccc;
-    margin-bottom: 2rem;
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
-  button {
-    padding: 0.75rem 1.5rem;
-    background: #4a9eff;
+  .loading-screen p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  .app-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  .main-content {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+  }
+
+  .chat-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary);
+  }
+
+  .chat-placeholder h2 {
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+  }
+
+  .chat-placeholder p {
+    margin: 0.25rem 0;
+  }
+
+  .conversation-id {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    font-family: 'Courier New', monospace;
+  }
+
+  .empty-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .empty-content {
+    text-align: center;
+    max-width: 400px;
+    padding: 2rem;
+  }
+
+  .empty-content svg {
+    color: var(--color-text-tertiary);
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-content h2 {
+    color: var(--color-text);
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .empty-content p {
+    color: var(--color-text-secondary);
+    margin: 0 0 2rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .settings-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: var(--color-accent);
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background var(--transition-fast);
   }
 
-  button:hover {
-    background: #3a8eef;
+  .settings-btn:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .settings-btn svg {
+    width: 16px;
+    height: 16px;
   }
 </style>
+
