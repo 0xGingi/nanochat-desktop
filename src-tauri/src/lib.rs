@@ -55,6 +55,7 @@ pub fn run() {
         save_config,
         validate_connection
     ])
+    .plugin(tauri_plugin_http::init())
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(

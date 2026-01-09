@@ -1,5 +1,6 @@
 import { getConfig } from "../stores/config";
 import type { ApiError } from "./types";
+import { fetch } from '@tauri-apps/plugin-http';
 
 interface RequestOptions extends RequestInit {
     skipAuth?: boolean;
@@ -52,27 +53,31 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions = 
         headers.set("Content-Type", "application/json");
     }
 
-    const response = await fetch(url, {
-        ...options,
-        headers,
-    });
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers,
+        });
 
-    if (!response.ok) {
-        let errorData;
-        try {
-            errorData = await response.json();
-        } catch (e) {
-            // Ignore non-JSON error bodies
+        if (!response.ok) {
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                // Ignore non-JSON error bodies
+            }
+            handleError(response, errorData);
         }
-        handleError(response, errorData);
-    }
 
-    // Handle 204 No Content
-    if (response.status === 204) {
-        return {} as T;
-    }
+        // Handle 204 No Content
+        if (response.status === 204) {
+            return {} as T;
+        }
 
-    return response.json();
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
 }
 
 /**
