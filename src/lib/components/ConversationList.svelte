@@ -39,6 +39,11 @@
     showDeleteConfirm = false;
     conversationToDelete = null;
   }
+
+  function handleNewChat() {
+    // Deselect current conversation to start a new one
+    conversationsStore.selectConversation(null);
+  }
   
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -60,6 +65,17 @@
 <div class="conversation-list">
   <div class="conversation-list-header">
     <h2>Conversations</h2>
+    <button
+      class="new-chat-btn"
+      on:click={handleNewChat}
+      title="New conversation"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      <span>New Chat</span>
+    </button>
   </div>
   
   <div class="conversation-list-content">
@@ -157,13 +173,38 @@
   .conversation-list-header {
     padding: 1.5rem 1rem 1rem;
     border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
   }
-  
+
   .conversation-list-header h2 {
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--color-text);
+  }
+
+  .new-chat-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-accent);
+    color: white;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: background var(--transition-fast);
+  }
+
+  .new-chat-btn:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .new-chat-btn svg {
+    flex-shrink: 0;
   }
   
   .conversation-list-content {

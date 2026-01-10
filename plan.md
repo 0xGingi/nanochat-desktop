@@ -258,9 +258,9 @@ Update `src/App.svelte`:
 - Responsive layout
 
 **Verification:**
-- [ ] Conversations from server appear in sidebar
-- [ ] Selecting conversation works
-- [ ] Delete removes conversation from list
+- [x] Conversations from server appear in sidebar
+- [x] Selecting conversation works
+- [x] Delete removes conversation from list
 
 ---
 
@@ -304,10 +304,10 @@ Implement polling in `sendMessage()`:
 - Stop polling when generation complete
 
 **Verification:**
-- [ ] Messages display correctly
-- [ ] New message sends and appears
-- [ ] AI response appears after generation
-- [ ] Auto-scroll works
+- [x] Messages display correctly
+- [x] New message sends and appears
+- [x] AI response appears after generation
+- [x] Auto-scroll works
 
 ---
 
@@ -332,8 +332,8 @@ Create `src/lib/components/ModelSelector.svelte`:
 - Pass selected model to generate-message
 
 **Verification:**
-- [ ] Models load from API
-- [ ] Selection changes model used for generation
+- [x] Models load from API
+- [x] Selection changes model used for generation
 
 ---
 
@@ -354,9 +354,9 @@ When sending first message to new chat:
 - Select new conversation
 
 **Verification:**
-- [ ] New chat button works
-- [ ] First message creates conversation
-- [ ] New conversation appears in list
+- [x] New chat button works
+- [x] First message creates conversation
+- [x] New conversation appears in list
 
 ---
 

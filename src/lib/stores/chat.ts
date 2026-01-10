@@ -4,12 +4,16 @@ import * as messagesApi from '../api/messages';
 import * as conversationsApi from '../api/conversations';
 import { get } from 'svelte/store';
 
+// Callback type for when a new conversation is created
+export type NewConversationCallback = (conversationId: string) => void;
+
 interface ChatState {
     conversationId: string | null;
     messages: Message[];
     loading: boolean;
     generating: boolean;
     error: string | null;
+    onNewConversation?: NewConversationCallback;
 }
 
 const initialState: ChatState = {
@@ -28,6 +32,10 @@ function createChatStore() {
 
     return {
         subscribe,
+
+        setNewConversationCallback(callback: NewConversationCallback) {
+            update(state => ({ ...state, onNewConversation: callback }));
+        },
 
         setConversation(conversationId: string | null) {
             // Clear any existing polling
@@ -75,18 +83,7 @@ function createChatStore() {
 
         async sendMessage(content: string, modelId: string) {
             const state = get({ subscribe });
-            const conversationId = state.conversationId;
-
-            if (!conversationId) {
-                throw new Error('No active conversation');
-            }
-
-            // Get current message counts before sending
-            const currentMessages = state.messages;
-            const initialMessageCount = currentMessages.length;
-            const initialAssistantCount = currentMessages.filter(m => m.role === 'assistant').length;
-
-            console.log('[Chat] Before send - Total messages:', initialMessageCount, 'Assistant:', initialAssistantCount);
+            let conversationId = state.conversationId;
 
             // Clear any existing polling
             if (pollInterval) {
@@ -101,15 +98,61 @@ function createChatStore() {
             }));
 
             try {
-                // Generate AI response (this creates the user message on the server)
-                await messagesApi.generateMessage({
-                    message: content,
-                    model_id: modelId,
-                    conversation_id: conversationId,
-                });
+                // If no conversation exists, create one with the first message
+                if (!conversationId) {
+                    console.log('[Chat] No conversation - creating new one with message');
+                    const newConversation = await conversationsApi.createWithMessage(
+                        content,
+                        content, // Plain text as HTML for now
+                        'user'
+                    );
 
-                // Start polling with initial counts
-                this.startPolling(conversationId, initialMessageCount, initialAssistantCount);
+                    conversationId = newConversation.id;
+
+                    // Notify callback that a new conversation was created
+                    const currentState = get({ subscribe });
+                    if (currentState.onNewConversation) {
+                        currentState.onNewConversation(conversationId);
+                    }
+
+                    // Set the conversation in the chat store
+                    update(state => ({
+                        ...state,
+                        conversationId,
+                    }));
+
+                    // Get initial message counts after creating conversation
+                    const messages = await messagesApi.getMessages(conversationId);
+                    const initialMessageCount = messages.length;
+                    const initialAssistantCount = messages.filter(m => m.role === 'assistant').length;
+
+                    // Now generate AI response
+                    await messagesApi.generateMessage({
+                        message: content,
+                        model_id: modelId,
+                        conversation_id: conversationId,
+                    });
+
+                    // Start polling for AI response
+                    this.startPolling(conversationId, initialMessageCount, initialAssistantCount);
+                } else {
+                    // Get current message counts before sending
+                    const currentMessages = state.messages;
+                    const initialMessageCount = currentMessages.length;
+                    const initialAssistantCount = currentMessages.filter(m => m.role === 'assistant').length;
+
+                    console.log('[Chat] Before send - Total messages:', initialMessageCount, 'Assistant:', initialAssistantCount);
+
+                    // Generate AI response (this creates the user message on the server)
+                    await messagesApi.generateMessage({
+                        message: content,
+                        model_id: modelId,
+                        conversation_id: conversationId,
+                    });
+
+                    // Start polling with initial counts
+                    this.startPolling(conversationId, initialMessageCount, initialAssistantCount);
+                }
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
                 update(state => ({

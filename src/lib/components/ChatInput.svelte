@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { chatStore, canSendMessage } from '../stores/chat';
+  import { chatStore } from '../stores/chat';
   import { modelsStore, selectedModel } from '../stores/models';
 
   export let disabled = false;
@@ -14,15 +14,7 @@
   async function handleSend() {
     const content = messageInput.trim();
 
-    if (!content || disabled || !$canSendMessage) {
-      return;
-    }
-
-    // Get the store state to access conversationId
-    const state = $chatStore;
-
-    if (!state.conversationId) {
-      console.error('No active conversation');
+    if (!content || disabled || $chatStore.generating) {
       return;
     }
 
@@ -64,7 +56,7 @@
   }
 </script>
 
-<div class="chat-input-container" class:disabled={disabled || !$canSendMessage}>
+<div class="chat-input-container" class:disabled={disabled || $chatStore.generating}>
   <div class="input-wrapper">
     <textarea
       bind:this={textareaElement}
@@ -78,7 +70,7 @@
     <button
       class="send-button"
       on:click={handleSend}
-      disabled={disabled || !$canSendMessage || !messageInput.trim()}
+      disabled={disabled || $chatStore.generating || !messageInput.trim()}
       title="Send message (Ctrl+Enter)"
     >
       {#if $chatStore.generating}

@@ -26,14 +26,35 @@ function createModelsStore() {
             update(state => ({ ...state, loading: true, error: null }));
 
             try {
-                const models = await modelsApi.getUserModels();
+                const response = await modelsApi.getUserModels();
 
-                // Filter to only enabled models
-                const enabledModels = models.filter(m => m.enabled);
+                console.log('[Models] Raw API response:', response);
+
+                // The API returns an object with model IDs as keys, not an array
+                // Convert the object to an array of models
+                let models: UserModel[] = [];
+
+                if (Array.isArray(response)) {
+                    // If it's already an array (future API change), use as-is
+                    models = response;
+                } else if (response && typeof response === 'object') {
+                    // Convert object to array of values
+                    models = Object.values(response) as UserModel[];
+                } else {
+                    console.error('[Models] Unexpected API response format:', response);
+                }
+
+                console.log('[Models] Parsed models:', models);
+
+                // Filter to only enabled models (models don't have an 'enabled' field in the response)
+                // So we'll use all models for now
+                const enabledModels = models;
 
                 // Get the first enabled model, preferring pinned models
                 const pinnedModel = enabledModels.find(m => m.pinned);
                 const defaultModel = pinnedModel || enabledModels[0];
+
+                console.log('[Models] Enabled models:', enabledModels.length, 'Default:', defaultModel?.modelId);
 
                 update(state => ({
                     ...state,
@@ -42,6 +63,7 @@ function createModelsStore() {
                     loading: false,
                 }));
             } catch (error) {
+                console.error('[Models] Load error:', error);
                 const errorMessage = error instanceof Error ? error.message : 'Failed to load models';
                 update(state => ({
                     ...state,

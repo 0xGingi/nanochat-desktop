@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount, onDestroy, tick } from 'svelte';
   import { chatStore } from '../stores/chat';
-  import { selectedConversation } from '../stores/conversations';
+  import { conversationsStore, selectedConversation } from '../stores/conversations';
   import { modelsStore } from '../stores/models';
   import ChatMessage from './ChatMessage.svelte';
   import ChatInput from './ChatInput.svelte';
+  import ModelSelector from './ModelSelector.svelte';
 
   let messagesContainer: HTMLElement;
   let shouldAutoScroll = true;
@@ -54,6 +55,15 @@
     if ($selectedConversation?.id) {
       chatStore.setConversation($selectedConversation.id);
     }
+
+    // Register callback for new conversations
+    chatStore.setNewConversationCallback(async (conversationId: string) => {
+      console.log('[ChatView] New conversation created:', conversationId);
+      // Refresh the conversation list
+      await conversationsStore.loadConversations();
+      // Select the new conversation
+      conversationsStore.selectConversation(conversationId);
+    });
   });
 
   onDestroy(() => {
@@ -80,6 +90,17 @@
 </script>
 
 <div class="chat-view">
+  <div class="chat-header">
+    <div class="chat-title">
+      {#if $selectedConversation}
+        <h2>{$selectedConversation.title || 'Untitled Conversation'}</h2>
+      {:else}
+        <h2>New Chat</h2>
+      {/if}
+    </div>
+    <ModelSelector />
+  </div>
+
   {#if $chatStore.loading}
     <div class="loading-state">
       <div class="spinner"></div>
@@ -98,8 +119,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
-        <h3>No messages yet</h3>
-        <p>Start a conversation by sending a message below</p>
+        <h3>{$selectedConversation ? 'No messages yet' : 'New conversation'}</h3>
+        <p>Start a conversation by typing a message below</p>
       </div>
     </div>
   {:else}
@@ -143,6 +164,26 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    flex-shrink: 0;
+  }
+
+  .chat-title h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .loading-state,
