@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { conversationsStore } from '../stores/conversations';
+  import { chatStore } from '../stores/chat';
   
   let showDeleteConfirm = false;
   let conversationToDelete: string | null = null;
@@ -41,8 +42,10 @@
   }
 
   function handleNewChat() {
-    // Deselect current conversation to start a new one
-    conversationsStore.selectConversation(null);
+    // Reset chat store to clear any previous conversation state
+    chatStore.setConversation(null);
+    // Enter new chat mode (clears selection and enables chat input)
+    conversationsStore.startNewChat();
   }
   
   function formatDate(dateString: string): string {

@@ -4,7 +4,8 @@
   import ConversationList from "./lib/components/ConversationList.svelte";
   import ChatView from "./lib/components/ChatView.svelte";
   import { getConfig } from "./lib/stores/config";
-  import { selectedConversation } from "./lib/stores/conversations";
+  import { conversationsStore, selectedConversation } from "./lib/stores/conversations";
+  import { chatStore } from "./lib/stores/chat";
 
   let configLoaded = false;
   let showSettings = false;
@@ -68,7 +69,7 @@
     </aside>
     
     <main class="main-content">
-      {#if $selectedConversation}
+      {#if $selectedConversation || $conversationsStore.isNewChatMode || $chatStore.generating || $chatStore.conversationId}
         <ChatView />
       {:else}
         <div class="empty-placeholder">

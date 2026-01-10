@@ -19,10 +19,12 @@ export async function getConversations(
 }
 
 export async function getConversation(id: string): Promise<Conversation> {
-    const list = await apiRequest<Conversation[]>(`/api/db/conversations?id=${id}`);
-    if (list.length === 0) {
-        throw { message: "Conversation not found", status: 404 };
+    const list = await apiRequest<Conversation[]>(`/api/db/conversations?id=${id}&t=${Date.now()}`);
+
+    if (!list || list.length === 0 || !list[0]) {
+        throw new Error(`Conversation not found: ${id}`);
     }
+
     return list[0];
 }
 
@@ -49,6 +51,11 @@ export async function createConversation(title: string, projectId?: string): Pro
     });
 }
 
+export interface CreateWithMessageResponse {
+    conversationId: string;
+    messageId: string;
+}
+
 export async function createWithMessage(
     content: string,
     contentHtml: string,
@@ -58,8 +65,8 @@ export async function createWithMessage(
         webSearchEnabled?: boolean;
         projectId?: string;
     }
-): Promise<Conversation> {
-    return apiRequest<Conversation>("/api/db/conversations", {
+): Promise<CreateWithMessageResponse> {
+    return apiRequest<CreateWithMessageResponse>("/api/db/conversations", {
         method: "POST",
         body: JSON.stringify({
             action: "createWithMessage",

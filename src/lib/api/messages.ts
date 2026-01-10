@@ -2,7 +2,7 @@ import { apiRequest } from "./client";
 import type { Message, GenerateMessageRequest, GenerateMessageResponse, Role } from "./types";
 
 export async function getMessages(conversationId: string): Promise<Message[]> {
-    return apiRequest<Message[]>(`/api/db/messages?conversationId=${conversationId}`);
+    return apiRequest<Message[]>(`/api/db/messages?conversationId=${conversationId}&t=${Date.now()}`);
 }
 
 export async function getPublicMessages(conversationId: string): Promise<Message[]> {

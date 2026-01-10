@@ -3,6 +3,7 @@
   import { chatStore } from '../stores/chat';
   import { conversationsStore, selectedConversation } from '../stores/conversations';
   import { modelsStore } from '../stores/models';
+  import * as conversationsApi from '../api/conversations';
   import ChatMessage from './ChatMessage.svelte';
   import ChatInput from './ChatInput.svelte';
   import ModelSelector from './ModelSelector.svelte';
@@ -14,7 +15,8 @@
   $: if ($selectedConversation?.id !== $chatStore.conversationId) {
     if ($selectedConversation?.id) {
       chatStore.setConversation($selectedConversation.id);
-    } else {
+    } else if (!$conversationsStore.isNewChatMode) {
+      // Only clear the conversation if we're not in new chat mode
       chatStore.setConversation(null);
     }
   }
@@ -57,12 +59,24 @@
     }
 
     // Register callback for new conversations
-    chatStore.setNewConversationCallback(async (conversationId: string) => {
+    chatStore.setNewConversationCallback((conversationId: string) => {
       console.log('[ChatView] New conversation created:', conversationId);
-      // Refresh the conversation list
-      await conversationsStore.loadConversations();
-      // Select the new conversation
-      conversationsStore.selectConversation(conversationId);
+
+      // Immediately add a placeholder conversation with "New Chat" title
+      // This ensures the sidebar shows the conversation right away
+      // The polling will update this with the real title and metadata from the server
+      const placeholderConversation = {
+        id: conversationId,
+        title: 'New Chat',
+        userId: '',
+        projectId: null,
+        pinned: false,
+        generating: true,
+        costUsd: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      conversationsStore.addAndSelectConversation(placeholderConversation);
     });
   });
 
