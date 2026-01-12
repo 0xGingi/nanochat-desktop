@@ -383,9 +383,9 @@ Create `src/app.css`:
 - Proper resize handling
 
 **Verification:**
-- [ ] App looks professional
-- [ ] All states (loading, error, empty) handled
-- [ ] Smooth animations
+- [x] App looks professional
+- [x] All states (loading, error, empty) handled
+- [x] Smooth animations
 
 ---
 
@@ -394,23 +394,25 @@ Create `src/app.css`:
 **Goal:** Verify everything works and create distributable
 
 ### 9.1 Manual Testing Checklist
-- [ ] Fresh install flow (no config)
-- [ ] Config saves and persists
-- [ ] Connection test works
-- [ ] Conversations list loads
-- [ ] Can view existing conversation
-- [ ] Can send message and receive response
-- [ ] Can create new conversation
-- [ ] Can delete conversation
-- [ ] Model selection works
-- [ ] App handles offline gracefully
+- [x] Fresh install flow (no config)
+- [x] Config saves and persists
+- [x] Connection test works
+- [x] Conversations list loads
+- [x] Can view existing conversation
+- [x] Can send message and receive response
+- [x] Can create new conversation
+- [x] Can delete conversation
+- [x] Model selection works
+- [x] App handles offline gracefully
 
 ### 9.2 Build Production
 ```bash
 npm run tauri build
 ```
-- Check `src-tauri/target/release/bundle/` for outputs
-- Test `.deb` or `.AppImage` on fresh system
+- [x] Check `src-tauri/target/release/bundle/` for outputs
+- [x] Test `.deb` or `.AppImage` on fresh system
+- [x] Build production distributable completed
+- [x] AppImage builds successfully with build.sh helper script
 
 ---
 

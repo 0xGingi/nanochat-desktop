@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import Settings from "./lib/components/Settings.svelte";
   import ConversationList from "./lib/components/ConversationList.svelte";
   import ChatView from "./lib/components/ChatView.svelte";
@@ -10,6 +10,32 @@
   let configLoaded = false;
   let showSettings = false;
   let isFirstRun = false;
+  let sidebarCollapsed = false;
+  let windowWidth: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
+  let isMobile = false;
+
+  // Update responsive state on window resize
+  function handleResize() {
+    windowWidth = window.innerWidth;
+    isMobile = windowWidth < 768;
+    // Auto-collapse sidebar on mobile
+    if (isMobile && !sidebarCollapsed) {
+      sidebarCollapsed = true;
+    }
+  }
+
+  onMount(() => {
+    console.log('[App] Component mounted');
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    loadAppConfig();
+  });
+
+  onDestroy(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', handleResize);
+    }
+  });
 
   async function loadAppConfig() {
     try {
@@ -36,11 +62,6 @@
     }
   }
 
-  onMount(() => {
-    console.log('[App] Component mounted');
-    loadAppConfig();
-  });
-
   async function handleSettingsClose() {
     showSettings = false;
     // Reload config after settings are saved
@@ -50,7 +71,13 @@
   function openSettings() {
     showSettings = true;
   }
+
+  function toggleSidebar() {
+    sidebarCollapsed = !sidebarCollapsed;
+  }
 </script>
+
+<svelte:window bind:innerWidth={windowWidth} />
 
 {#if !configLoaded}
   <div class="loading-screen">
@@ -58,17 +85,47 @@
     <p>Loading...</p>
   </div>
 {:else if showSettings}
-  <Settings 
+  <Settings
     isFirstRun={isFirstRun}
     onClose={handleSettingsClose}
   />
 {:else}
   <div class="app-container">
-    <aside class="sidebar">
+    <aside class="sidebar" class:collapsed={sidebarCollapsed}>
       <ConversationList />
     </aside>
     
     <main class="main-content">
+      <button
+        class="sidebar-toggle"
+        class:sidebar-visible={!sidebarCollapsed}
+        on:click={toggleSidebar}
+        aria-label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+        title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          {#if sidebarCollapsed}
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+            <path d="M13 15l3-3-3-3"/>
+          {:else}
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+            <path d="M11 9l-3 3 3 3"/>
+          {/if}
+        </svg>
+      </button>
+      
+      {#if !sidebarCollapsed && isMobile}
+        <div
+          class="sidebar-overlay"
+          on:click={toggleSidebar}
+          on:keydown={(e) => e.key === 'Escape' && toggleSidebar()}
+          role="button"
+          tabindex="-1"
+        ></div>
+      {/if}
+
       {#if $selectedConversation || $conversationsStore.isNewChatMode || $chatStore.generating || $chatStore.conversationId}
         <ChatView />
       {:else}
@@ -129,12 +186,66 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    position: relative;
   }
 
   .sidebar {
     width: var(--sidebar-width);
     height: 100%;
     flex-shrink: 0;
+    transition: transform var(--transition-normal), width var(--transition-normal);
+    position: relative;
+    z-index: 100;
+  }
+
+  .sidebar.collapsed {
+    width: 0;
+    transform: translateX(-100%);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 99;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .sidebar-toggle {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .sidebar-toggle:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+    border-color: var(--color-accent);
+  }
+
+  .sidebar-toggle.sidebar-visible {
+    /* Optional: move button when sidebar is visible if it overlaps */
   }
 
   .main-content {
@@ -142,6 +253,9 @@
     height: 100%;
     overflow: hidden;
     background: var(--color-bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .empty-placeholder {
@@ -196,9 +310,44 @@
     background: var(--color-accent-hover);
   }
 
+  .settings-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
   .settings-btn svg {
     width: 16px;
     height: 16px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: var(--sidebar-width);
+      max-width: 80vw;
+      box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-width); /* Keep width for animation */
+      transform: translateX(-100%);
+    }
+    
+    .sidebar-toggle {
+      top: 0.75rem;
+      left: 0.75rem;
+    }
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar, .sidebar-toggle, .settings-btn {
+      transition: none !important;
+    }
   }
 </style>
 

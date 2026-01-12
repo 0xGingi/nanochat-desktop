@@ -157,6 +157,12 @@
     cursor: pointer;
     transition: all var(--transition-fast);
     max-width: 280px;
+    outline: none;
+  }
+
+  .model-selector-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   .model-selector-button:hover:not(:disabled) {
@@ -257,6 +263,12 @@
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
+    outline: none;
+  }
+
+  .favorites-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   .favorites-toggle:hover {
@@ -302,6 +314,12 @@
     transition: background var(--transition-fast);
     width: 100%;
     text-align: left;
+    outline: none;
+  }
+
+  .model-option:focus-visible {
+    background: var(--color-bg-hover);
+    box-shadow: inset 0 0 0 2px var(--color-accent);
   }
 
   .model-option:hover {

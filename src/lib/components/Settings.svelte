@@ -168,6 +168,12 @@
     max-width: 500px;
     position: relative;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 
   h2 {
@@ -216,6 +222,7 @@
   input:focus {
     outline: none;
     border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
   }
 
   .api-key-input {
@@ -318,5 +325,19 @@
 
   .close-button:hover {
     color: var(--color-text);
+  }
+
+  @media (max-width: 480px) {
+    .settings-modal {
+      padding: 1.5rem;
+    }
+
+    .button-group {
+      flex-direction: column;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
   }
 </style>

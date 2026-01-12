@@ -18,9 +18,23 @@ npm run check         # TypeScript type checking with svelte-check
 
 ### Tauri Desktop App
 ```bash
-npm run tauri:dev     # Start Tauri development mode (full app)
-npm run tauri:build   # Build desktop app for distribution
+npm run tauri:dev           # Start Tauri development mode (full app)
+npm run tauri:build         # Build desktop app for distribution
+npm run tauri:build:appimage  # Build AppImage with Fedora 42+/Toolbx workarounds
+./build.sh                  # Full build with all workarounds (recommended for Linux)
 ```
+
+#### Linux Build Notes (Fedora 42+, Toolbx, modern distros)
+
+On modern Linux distributions that only have libfuse3 (not libfuse2) or use newer GCC with `.relr.dyn` ELF sections, the AppImage build requires special environment variables:
+
+```bash
+# Required for AppImage builds on libfuse3-only systems:
+export APPIMAGE_EXTRACT_AND_RUN=1  # Runs AppImages by extracting first (no FUSE needed)
+export NO_STRIP=1                   # Skips stripping to avoid .relr.dyn section errors
+```
+
+The `./build.sh` script and `npm run tauri:build:appimage` automatically set these.
 
 ### Rust Backend
 ```bash

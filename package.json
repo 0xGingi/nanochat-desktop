@@ -10,7 +10,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "tauri:build:appimage": "APPIMAGE_EXTRACT_AND_RUN=1 NO_STRIP=1 tauri build --bundles appimage"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0",

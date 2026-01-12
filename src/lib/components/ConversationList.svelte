@@ -83,9 +83,13 @@
   
   <div class="conversation-list-content">
     {#if $conversationsStore.loading}
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading conversations...</p>
+      <div class="conversations loading-skeleton">
+        {#each Array(6) as _}
+          <div class="skeleton-item">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-meta"></div>
+          </div>
+        {/each}
       </div>
     {:else if $conversationsStore.error}
       <div class="error-state">
@@ -292,7 +296,6 @@
     color: var(--color-danger);
   }
   
-  .loading-state,
   .error-state,
   .empty-state {
     display: flex;
@@ -303,21 +306,7 @@
     text-align: center;
     color: var(--color-text-secondary);
   }
-  
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  .loading-state p,
+
   .empty-state p {
     margin: 0.5rem 0 0;
     font-size: 0.875rem;
@@ -422,5 +411,44 @@
   
   .btn-danger:hover {
     opacity: 0.9;
+  }
+
+  /* Skeleton Loading Styles */
+  .loading-skeleton {
+    pointer-events: none;
+    padding: 0.5rem;
+  }
+
+  .skeleton-item {
+    height: 60px;
+    margin-bottom: 0.25rem;
+    padding: 0.75rem;
+    background: var(--color-bg-hover);
+    border-radius: 0.5rem;
+    opacity: 0.6;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+
+  .skeleton-title {
+    height: 14px;
+    width: 80%;
+    background: var(--color-border);
+    border-radius: 2px;
+  }
+
+  .skeleton-meta {
+    height: 10px;
+    width: 40%;
+    background: var(--color-border);
+    border-radius: 2px;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.6; }
   }
 </style>

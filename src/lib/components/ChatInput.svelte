@@ -132,6 +132,7 @@
   textarea:focus {
     outline: none;
     border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-bg, rgba(100, 108, 255, 0.1));
   }
 
   textarea::placeholder {

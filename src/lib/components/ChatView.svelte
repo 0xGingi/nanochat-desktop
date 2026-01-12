@@ -116,9 +116,18 @@
   </div>
 
   {#if $chatStore.loading}
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading messages...</p>
+    <div class="messages-container loading-skeleton">
+      <div class="skeleton-header"></div>
+      {#each Array(5) as _}
+        <div class="skeleton-message">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-text-container">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line medium"></div>
+          </div>
+        </div>
+      {/each}
     </div>
   {:else if $chatStore.error}
     <div class="error-state">
@@ -169,7 +178,9 @@
     </div>
   {/if}
 
-  <ChatInput placeholder="Type a message..." />
+  <div class="chat-footer">
+    <ChatInput placeholder="Type a message..." />
+  </div>
 </div>
 
 <style>
@@ -184,7 +195,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
+    padding: 0.875rem 1.5rem 0.875rem 3.5rem; /* Space for sidebar toggle */
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg-secondary);
     flex-shrink: 0;
@@ -200,7 +211,10 @@
     white-space: nowrap;
   }
 
-  .loading-state,
+  .chat-footer {
+    flex-shrink: 0;
+  }
+
   .error-state,
   .empty-state {
     flex: 1;
@@ -209,25 +223,6 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 1rem;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .loading-state p {
-    color: var(--color-text-secondary);
-    margin: 0;
   }
 
   .error-message {
@@ -363,6 +358,72 @@
     }
     40% {
       transform: scale(1);
+    }
+  }
+
+  /* Skeleton Loading Styles */
+  .loading-skeleton {
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .skeleton-header {
+    height: 24px;
+    width: 150px;
+    background: var(--color-bg-hover);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+
+  .skeleton-message {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .skeleton-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-bg-hover);
+    flex-shrink: 0;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+
+  .skeleton-text-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .skeleton-line {
+    height: 12px;
+    background: var(--color-bg-hover);
+    border-radius: 2px;
+    width: 100%;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+
+  .skeleton-line.short { width: 30%; }
+  .skeleton-line.medium { width: 70%; }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .chat-header {
+      padding: 0.75rem 1rem 0.75rem 3rem;
+    }
+    
+    .chat-title h2 {
+      font-size: 0.9375rem;
     }
   }
 </style>
