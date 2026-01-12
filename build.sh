@@ -4,6 +4,7 @@
 # Usage:
 #   ./build.sh                    # Build all bundle types
 #   ./build.sh --bundles appimage # Build AppImage only
+#   ./build.sh --bundles flatpak  # Build Flatpak only
 #   ./build.sh --bundles deb      # Build deb only
 #
 # This script sets environment variables needed to work around issues on:
@@ -25,8 +26,8 @@ export NO_STRIP=1                   # Skip stripping to avoid .relr.dyn section 
 # PKG_CONFIG_PATH for finding system libraries
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
 
-echo "Building Tauri application with AppImage workarounds..."
-echo "  APPIMAGE_EXTRACT_AND_RUN=1 (for libfuse2 compatibility)"
+echo "Building Tauri application with Linux workarounds..."
+echo "  APPIMAGE_EXTRACT_AND_RUN=1 (for AppImage libfuse2 compatibility)"
 echo "  NO_STRIP=1 (for modern ELF .relr.dyn section compatibility)"
 echo ""
 

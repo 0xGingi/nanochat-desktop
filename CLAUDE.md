@@ -21,6 +21,7 @@ npm run check         # TypeScript type checking with svelte-check
 npm run tauri:dev           # Start Tauri development mode (full app)
 npm run tauri:build         # Build desktop app for distribution
 npm run tauri:build:appimage  # Build AppImage with Fedora 42+/Toolbx workarounds
+npm run tauri:build:flatpak   # Build Flatpak bundle
 ./build.sh                  # Full build with all workarounds (recommended for Linux)
 ```
 
@@ -35,6 +36,20 @@ export NO_STRIP=1                   # Skips stripping to avoid .relr.dyn section
 ```
 
 The `./build.sh` script and `npm run tauri:build:appimage` automatically set these.
+
+#### Flatpak Builds
+
+Flatpak builds require `flatpak` and `flatpak-builder` installed on the host.
+
+```bash
+# Build Flatpak using the helper script
+./build.sh --bundles flatpak
+
+# Build Flatpak using npm
+npm run tauri:build:flatpak
+```
+
+The Flatpak manifest is located at `org.nanochat.desktop.json`. It uses the Freedesktop SDK 23.08.
 
 ### Rust Backend
 ```bash
