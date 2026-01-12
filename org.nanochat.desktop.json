@@ -1,7 +1,7 @@
 {
   "app-id": "org.nanochat.desktop",
   "runtime": "org.freedesktop.Platform",
-  "runtime-version": "23.08",
+  "runtime-version": "25.08",
   "sdk": "org.freedesktop.Sdk",
   "command": "nanochat-desktop",
   "finish-args": [
@@ -17,8 +17,8 @@
       "name": "nanochat-desktop",
       "buildsystem": "simple",
       "build-commands": [
-        "npm install",
-        "npm run tauri build -- --bundles flatpak",
+        "/usr/bin/npm install",
+        "/usr/bin/npm run tauri build -- --bundles flatpak",
         "cp -r src-tauri/target/release/bundle/flatpak/org.nanochat.desktop/* /app/"
       ],
       "sources": [

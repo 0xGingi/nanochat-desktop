@@ -46,7 +46,7 @@ Tauri does not support Flatpak as a bundle type directly. Flatpak builds require
 flatpak-builder --user --install --force-clean build-flatpak org.nanochat.desktop.json
 ```
 
-The Flatpak manifest is located at `org.nanochat.desktop.json`. It uses the Freedesktop SDK 23.08.
+The Flatpak manifest is located at `org.nanochat.desktop.json`. It uses the Freedesktop SDK 25.08.
 
 ### Rust Backend
 ```bash
