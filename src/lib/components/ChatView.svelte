@@ -1,12 +1,22 @@
 <script lang="ts">
   import { onMount, onDestroy, tick } from 'svelte';
+  import { derived } from 'svelte/store';
   import { chatStore } from '../stores/chat';
   import { conversationsStore, selectedConversation } from '../stores/conversations';
   import { modelsStore } from '../stores/models';
+  import { assistants, selectedAssistantId } from '../stores/assistants';
   import * as conversationsApi from '../api/conversations';
   import ChatMessage from './ChatMessage.svelte';
   import ChatInput from './ChatInput.svelte';
   import ModelSelector from './ModelSelector.svelte';
+
+  const selectedAssistant = derived(
+    [assistants, selectedAssistantId],
+    ([$assistants, $selectedAssistantId]) => {
+      if (!$selectedAssistantId) return null;
+      return $assistants.find(a => a.id === $selectedAssistantId) ?? null;
+    }
+  );
 
   let messagesContainer: HTMLElement;
   let shouldAutoScroll = true;
@@ -48,11 +58,6 @@
   }
 
   onMount(() => {
-    // Load available models
-    modelsStore.loadModels().catch(err => {
-      console.error('Failed to load models:', err);
-    });
-
     // Initialize with the selected conversation
     if ($selectedConversation?.id) {
       chatStore.setConversation($selectedConversation.id);
@@ -110,6 +115,9 @@
         <h2>{$selectedConversation.title || 'Untitled Conversation'}</h2>
       {:else}
         <h2>New Chat</h2>
+      {/if}
+      {#if $selectedAssistant}
+        <span class="assistant-name">Assistant: {$selectedAssistant.name}</span>
       {/if}
     </div>
     <ModelSelector />
@@ -209,6 +217,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .assistant-name {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
   }
 
   .chat-footer {

@@ -6,6 +6,8 @@
   import { getConfig } from "./lib/stores/config";
   import { conversationsStore, selectedConversation } from "./lib/stores/conversations";
   import { chatStore } from "./lib/stores/chat";
+  import { loadAssistants } from "./lib/stores/assistants";
+  import { modelsStore } from "./lib/stores/models";
 
   let configLoaded = false;
   let showSettings = false;
@@ -49,8 +51,21 @@
         isFirstRun = true;
         showSettings = true;
       } else {
-        console.log('[App] Config valid, showing main app');
+        console.log('[App] Config valid, loading data in parallel...');
         isFirstRun = false;
+        
+        // Load all data in parallel for faster startup
+        // Config must be loaded first (already done above), then these can run concurrently
+        await Promise.all([
+          loadAssistants(),
+          conversationsStore.loadConversations(),
+          modelsStore.loadModels()
+        ]).catch(err => {
+          console.error('[App] Error loading data:', err);
+          // Non-fatal: individual stores handle their own errors
+        });
+        
+        console.log('[App] All data loaded');
       }
       
       configLoaded = true;

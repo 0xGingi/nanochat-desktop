@@ -421,21 +421,23 @@ npm run tauri build
 > [!NOTE]
 > These features leverage the comprehensive API endpoints documented in `api-docs.md`.
 
-### V2 - File Attachments
+### V2 - Assistants (v0.2.0) ✅
+- [x] Load assistants from `/api/assistants` on app init
+- [x] Assistant selector dropdown in ChatInput
+- [x] Read-only view in Settings UI
+- [x] Pass `assistant_id` to generate-message
+- [x] Show assistant name in chat header
+- [x] Performance: Parallel data loading on startup
+- [x] Fix: Auto-select model based on assistant preference
+- [x] Stability: Fixed Vite watcher crash (ELOOP) and removed Flatpak artifacts
+
+### V2 - File Attachments (Planned)
 - Add file picker to ChatInput
 - Upload images via `/api/storage` (POST with binary content)
 - Upload documents (PDF, Markdown, Text, EPUB) via storage
 - Display attached images inline in messages
 - Display document links/previews in messages
 - Pass `images` and `documents` arrays to generate-message
-
-### V2 - Assistants
-- Load assistants from `/api/assistants` on app init
-- Assistant selector dropdown in ChatInput or header
-- Create/Edit/Delete assistants via Settings UI
-- Pass `assistant_id` to generate-message
-- Show assistant name/icon in chat header
-- Set default assistant per user
 
 ### V2 - Web Search Integration
 - Toggle web search in ChatInput
