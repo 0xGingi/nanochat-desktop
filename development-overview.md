@@ -125,41 +125,35 @@ The app will:
 
 ## Version Roadmap
 
-### 🎯 V1 - Core Chat (MVP)
+### 🎯 V1 - Core Chat (MVP) ✅
 
 **Goal**: Basic chat functionality with the API server.
 
-| Feature | Description |
-|---------|-------------|
-| **Configuration** | First-run setup for server URL and API key |
-| **New Chat** | Send messages, receive AI responses |
-| **Chat History** | View list of existing conversations |
-| **View Conversation** | Open and read past conversations |
-| **Model Selection** | Choose AI model for generation |
-
-**API Endpoints Used**:
-- `POST /api/generate-message` - Send messages
-- `GET /api/db/conversations` - List all conversations
-- `GET /api/db/messages?conversationId=X` - Get messages for a conversation
-- `GET /api/db/user-models` - Get available models
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Configuration** | First-run setup for server URL and API key | Done |
+| **New Chat** | Send messages, receive AI responses | Done |
+| **Chat History** | View list of existing conversations | Done |
+| **View Conversation** | Open and read past conversations | Done |
+| **Model Selection** | Choose AI model for generation | Done |
 
 ---
 
-### 🔧 V2 - Enhanced Features
+### 🔧 V2 - Enhanced Features (v0.2.0) 🚀
 
-**Goal**: File attachments and assistant customization.
+**Goal**: Assistant support, performance optimizations, and stabilization.
 
-| Feature | Description |
-|---------|-------------|
-| **File Attachments** | Upload images and documents to chats |
-| **Assistant Selection** | Choose from configured assistants |
-| **Web Search Toggle** | Enable/disable web search modes |
-| **Cancel Generation** | Stop in-progress AI responses |
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Assistant Support** | Read-only access to server-managed assistants | Done |
+| **Auto-Model Selection** | Automatically switch model based on assistant's preference | Done |
+| **Parallel Loading** | Optimized startup by fetching data concurrently | Done |
+| **File Attachments** | Upload images and documents to chats | Planned |
+| **Web Search Toggle** | Enable/disable web search modes | Planned |
+| **Cancel Generation** | Stop in-progress AI responses | Planned |
 
 **API Endpoints Used**:
-- `POST /api/storage` - Upload files
 - `GET /api/assistants` - List assistants
-- `POST /api/cancel-generation` - Cancel in-progress generation
 
 ---
 
