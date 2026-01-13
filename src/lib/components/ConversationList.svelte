@@ -1,19 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { conversationsStore } from '../stores/conversations';
   import { chatStore } from '../stores/chat';
   
   let showDeleteConfirm = false;
   let conversationToDelete: string | null = null;
-  
-  onMount(async () => {
-    try {
-      await conversationsStore.loadConversations();
-    } catch (error) {
-      console.error('Failed to load conversations on mount:', error);
-      // Error will be handled by the store's error state
-    }
-  });
   
   function handleSelect(conversationId: string) {
     conversationsStore.selectConversation(conversationId);

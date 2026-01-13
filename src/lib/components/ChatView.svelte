@@ -58,11 +58,6 @@
   }
 
   onMount(() => {
-    // Load available models
-    modelsStore.loadModels().catch(err => {
-      console.error('Failed to load models:', err);
-    });
-
     // Initialize with the selected conversation
     if ($selectedConversation?.id) {
       chatStore.setConversation($selectedConversation.id);
