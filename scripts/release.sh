@@ -24,12 +24,16 @@ set -e
 # Get current branch name
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Check if branch name contains version pattern (e.g., v03, v12)
-if [[ $BRANCH =~ v([0-9])([0-9]) ]]; then
+# Check if branch name contains version pattern (e.g., v1.0.0, v.1.1.1, v03, v12)
+if [[ $BRANCH =~ v\.?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+    DERIVED_VERSION="${BASH_REMATCH[1]}"
+elif [[ $BRANCH =~ v([0-9])([0-9]) ]]; then
     MAJOR="${BASH_REMATCH[1]}"
     MINOR="${BASH_REMATCH[2]}"
     DERIVED_VERSION="$MAJOR.$MINOR.0"
-    
+fi
+
+if [ -n "$DERIVED_VERSION" ]; then
     echo "======================================"
     echo "Branch-based version detected!"
     echo "======================================"
@@ -44,6 +48,10 @@ if [[ $BRANCH =~ v([0-9])([0-9]) ]]; then
     # Update tauri.conf.json
     echo "Updating src-tauri/tauri.conf.json version to $DERIVED_VERSION..."
     node -e "const cfg = require('./src-tauri/tauri.conf.json'); cfg.version = '$DERIVED_VERSION'; require('fs').writeFileSync('./src-tauri/tauri.conf.json', JSON.stringify(cfg, null, 2) + '\n');"
+    
+    # Update src-tauri/Cargo.toml
+    echo "Updating src-tauri/Cargo.toml version to $DERIVED_VERSION..."
+    sed -i "s/^version = \".*\"/version = \"$DERIVED_VERSION\"/" src-tauri/Cargo.toml
     
     echo "✓ Version files updated"
     echo ""
