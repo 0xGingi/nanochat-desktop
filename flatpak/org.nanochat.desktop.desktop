@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=NanoChat Desktop
+Comment=Desktop client for NanoChat
+Exec=nanochat-desktop
+Icon=org.nanochat.desktop
+Terminal=false
+Categories=Network;Chat;
+StartupWMClass=NanoChat Desktop

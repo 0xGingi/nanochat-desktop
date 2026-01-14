@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.nanochat.desktop</id>
+  <name>NanoChat Desktop</name>
+  <summary>Desktop client for NanoChat</summary>
+  <description>
+    <p>A sleek desktop chat application for interacting with NanoChat services.</p>
+  </description>
+  <launchable type="desktop-id">org.nanochat.desktop.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <developer_name>NanoChat</developer_name>
+  <categories>
+    <category>Network</category>
+    <category>Chat</category>
+  </categories>
+</component>
