@@ -33,7 +33,7 @@ jobs:
           - platform: windows
             arch: x64
             os: windows-latest
-            bundles: "msi,exe"
+            bundles: "msi,nsis"
           - platform: macos
             arch: x64
             os: macos-15-intel
@@ -92,7 +92,7 @@ jobs:
         if: matrix.platform == 'linux' && matrix.flatpak
         run: |
           sudo apt-get install -y flatpak flatpak-builder
-          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
       - name: Install npm dependencies
         run: npm ci
